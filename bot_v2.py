@@ -33,7 +33,24 @@ from aiogram.types import (
     LabeledPrice, PreCheckoutQuery,
 )
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from flask import Flask
+from threading import Thread
 
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Бот запущен и работает!"
+
+def run_web_server():
+    # Render сам назначит порт, мы его просто подхватываем
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)
+
+def keep_alive():
+    t = Thread(target=run_web_server)
+    t.daemon = True
+    t.start()
 # ─────────────────────────────────────────────────────────────
 # КОНФИГУРАЦИЯ
 # ─────────────────────────────────────────────────────────────
@@ -2039,6 +2056,7 @@ async def weekly_tournament_reset(bot: Bot):
 # ─────────────────────────────────────────────────────────────
 
 async def main():
+    keep_alive()
     bot = Bot(token=BOT_TOKEN)
     dp  = Dispatcher(storage=MemoryStorage())
     dp.include_router(router)
